@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        .map {
+            width: 100vw;
+            height: 70vh;
+            background-color: #d4e4e4;
+        }
+
+        .map-slider {
+            background-color: #0083a9;
+            margin: 0;
+            padding-top: 12px;
+            padding-bottom: 6px;
+            color: #ffffff;
+            text-align: center;
+        }
+        .map-slider > input[type='range'] {
+            width:200px;
+            margin: 0 auto;
+            margin-top: 6px;
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+
+
+</head>
+
+<body>
+<div id="map" class="map"></div>
+
+<nav>
+    <div class="nav-wrapper #212121 grey darken-4">
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <li><a href="home.html"></a></li>
+        <li><a href="habits.html"></a></li>
+        <li><a href="diet.html"></a></li>
+        <li><a href="contact.html"></a></li>
+      </ul>
+    </div>
+  </nav>
+
+
+<div class="container-fluid">
+
+
+    <h1 class="center-align">Google Maps + Flickr API mashup</h1>
+
+    <div class="container">
+
+
+        <div class="row">
+
+          <div class="col s12 flow-text">
+            This application links your public photos from Flickr and loops through them to create a marker for each one that has been geotagged.
+          </div>
+
+          <div class="col s12 flow-text">
+
+          <p>Just click on the red markers to see the photo of the location. This map shows 4 locations in
+            Australia and 5 locations in the United States.
+
+          </p>
+          </div>
+          </div>
+
+        </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="jquery.1.11.1.js"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCXibAAKiuyyPPWHdNh8fJV5_IHaELAicg"></script>
+<script>
+
+    var photoMap;
+    var infowindow = [];
+    var marker=[];
+
+    google.maps.event.addDomListener(window, 'load', initMap);
+
+    function displayImages(data) {
+        console.log(data);
+        $.each(data.photos.photo, function(i, item) {
+
+            var markerLat = item.latitude;
+            var markerLong = item.longitude;
+
+            var photoTitle = item.title;
+
+            var photoURL = '//farm' +
+                    item.farm + '.static.flickr.com/' +
+                    item.server + '/' +
+                    item.id + '_' +
+                    item.secret + '_m.jpg';
+
+            var htmlImageString = '<img src="' + photoURL + '" alt="' + photoTitle + '" />';
+
+
+            var imgLink = '<a href="//www.flickr.com/photos/gazabwoy/' + item.id + '/" target="_blank">View on Flickr</a>'
+
+            var contentString = '<div class="pop_up_image_box_text">' +
+                    photoTitle + '<br>' +
+                    htmlImageString + '<br>' +
+                    imgLink + '</div>';
+
+            infowindow[i] = new google.maps.InfoWindow({
+                content: contentString
+            });
+            var myLatlngMarker = new google.maps.LatLng(markerLat, markerLong);
+            marker[i] = new google.maps.Marker({
+                position: myLatlngMarker,
+                map: photoMap
+            });
+            google.maps.event.addListener(marker[i], 'click', function() {
+                infowindow[i].open(photoMap, marker[i]);
+                this.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
+            });
+
+        });
+
+    }
+
+    function loadPhotos() {
+flickrCall='https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=7c27d4e8f892d585d37a74d77e761e19&user_id=149192864@N07&privacy_filter=1&has_geo=1&extras=geo,tags,machine_tags&format=json&jsoncallback=?';        //&lat=-34.337119  lat and long coords of center of area
+        $.getJSON(flickrCall, displayImages);
+    }
+
+    function initMap() {
+
+        photoMap = new google.maps.Map(document.getElementById("map"), {
+            center: {lat: -34.0647765, lng: 150.5763783},
+            zoom: 8,
+            scaleControl: true,
+            streetViewControl: false,
+            mapTypeControl: true,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+        loadPhotos();
+    }
+
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+
+
+</body>
+</html>
